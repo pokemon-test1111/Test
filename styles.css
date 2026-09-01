@@ -11,12 +11,14 @@ body {
     align-items: center;
     min-height: 100vh;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 10px;
 }
 
 .container {
     display: flex;
     justify-content: center;
     align-items: center;
+    width: 100%;
 }
 
 .screen {
@@ -33,7 +35,8 @@ body {
     border-radius: 20px;
     padding: 20px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    width: 320px;
+    width: 100%;
+    max-width: 400px;
 }
 
 .screen-content {
@@ -70,21 +73,21 @@ body {
 }
 
 #authForm input {
-    padding: 10px;
+    padding: 12px;
     border: 2px solid #2a2a2a;
     border-radius: 3px;
-    font-size: 14px;
+    font-size: 16px;
     background: #f0f0f0;
 }
 
 #authForm button {
-    padding: 10px;
+    padding: 12px;
     margin: 5px 0;
     background: #c4232b;
     color: white;
     border: 2px solid #2a2a2a;
     border-radius: 3px;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.2s;
@@ -103,6 +106,7 @@ body {
     margin: 10px 0;
     width: 100%;
     height: auto;
+    display: block;
 }
 
 .game-info {
@@ -110,6 +114,7 @@ body {
     font-size: 12px;
     text-align: left;
     margin-top: 10px;
+    width: 100%;
 }
 
 .game-info p {
@@ -117,61 +122,180 @@ body {
     font-weight: bold;
 }
 
-.controls {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
+/* Game Boy Controls Layout */
+.controls-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
     margin-top: 20px;
-    width: 150px;
-    margin-left: auto;
-    margin-right: auto;
+    padding: 0 10px;
 }
 
-.controls button {
-    padding: 15px;
+/* D-Pad (Left Side) */
+.dpad {
+    display: grid;
+    grid-template-columns: repeat(3, 50px);
+    grid-template-rows: repeat(3, 50px);
+    gap: 3px;
+    width: fit-content;
+}
+
+.dpad button {
     background: #c4232b;
     color: white;
     border: 2px solid #2a2a2a;
-    border-radius: 5px;
-    font-size: 18px;
+    border-radius: 4px;
+    font-size: 20px;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.1s;
+    user-select: none;
+    -webkit-touch-callout: none;
+    touch-action: manipulation;
 }
 
-.controls button:active {
+.dpad button:active {
     transform: scale(0.95);
     background: #a01a22;
 }
 
-.arrow:nth-child(1) {
+.dpad-up {
     grid-column: 2;
+    grid-row: 1;
 }
 
-.arrow:nth-child(2) {
+.dpad-left {
     grid-column: 1;
     grid-row: 2;
 }
 
-.arrow:nth-child(3) {
+.dpad-center {
     grid-column: 2;
     grid-row: 2;
+    background: #666;
+    cursor: default;
+    border-radius: 50%;
 }
 
-.arrow:nth-child(4) {
+.dpad-center:active {
+    transform: none;
+    background: #666;
+}
+
+.dpad-right {
     grid-column: 3;
     grid-row: 2;
 }
 
+.dpad-down {
+    grid-column: 2;
+    grid-row: 3;
+}
+
+/* Action Buttons (Right Side) */
+.action-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 50px);
+    grid-template-rows: repeat(3, 50px);
+    gap: 3px;
+    width: fit-content;
+}
+
+.action-buttons button {
+    background: #FFD60A;
+    color: #000;
+    border: 2px solid #2a2a2a;
+    border-radius: 50%;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.1s;
+    user-select: none;
+    -webkit-touch-callout: none;
+    touch-action: manipulation;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.action-buttons button:active {
+    transform: scale(0.95);
+}
+
+.btn-y {
+    grid-column: 2;
+    grid-row: 1;
+    background: #FF6B9D;
+    color: white;
+}
+
+.btn-x {
+    grid-column: 1;
+    grid-row: 2;
+    background: #4A9FD8;
+    color: white;
+}
+
+.btn-b {
+    grid-column: 3;
+    grid-row: 2;
+    background: #FF6B9D;
+    color: white;
+}
+
+.btn-a {
+    grid-column: 2;
+    grid-row: 3;
+    background: #2ECC71;
+    color: white;
+}
+
+.center-circle {
+    grid-column: 2;
+    grid-row: 2;
+    background: #999;
+    cursor: default;
+}
+
+.center-circle:active {
+    transform: none;
+}
+
+/* Bottom Control Buttons */
+.bottom-controls {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 15px;
+    width: 100%;
+}
+
+.bottom-controls button {
+    padding: 10px 20px;
+    background: #8b8680;
+    color: #000;
+    border: 2px solid #2a2a2a;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 80px;
+}
+
+.bottom-controls button:active {
+    background: #6b6860;
+}
+
 .logout-btn {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     margin-top: 15px;
     background: #666;
     color: white;
     border: 2px solid #2a2a2a;
     border-radius: 3px;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.2s;
@@ -181,15 +305,35 @@ body {
     background: #555;
 }
 
-/* Game Boy lens effect */
-.gameboy::before {
-    content: '';
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    width: 300px;
-    height: 180px;
-    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3), transparent);
-    border-radius: 5px;
-    pointer-events: none;
+/* Mobile responsiveness */
+@media (max-width: 480px) {
+    .gameboy {
+        border: 8px solid #2a2a2a;
+        padding: 15px;
+    }
+    
+    .screen-content {
+        padding: 12px;
+    }
+    
+    .dpad, .action-buttons {
+        grid-template-columns: repeat(3, 45px);
+        grid-template-rows: repeat(3, 45px);
+    }
+    
+    .dpad button, .action-buttons button {
+        font-size: 18px;
+    }
+    
+    .controls-container {
+        gap: 15px;
+    }
+}
+
+/* Labels for buttons */
+.button-label {
+    display: block;
+    font-size: 10px;
+    margin-top: 3px;
+    font-weight: bold;
 }
