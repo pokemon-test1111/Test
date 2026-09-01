@@ -31,16 +31,37 @@
                     <h2 id="playerName">Welcome!</h2>
                     <canvas id="gameCanvas" width="160" height="144"></canvas>
                     <div class="game-info">
-                        <p>Pokémon: <span id="pokemonCount">0</span></p>
-                        <p>Level: <span id="playerLevel">1</span></p>
+                        <p>Pokémon: <span id="pokemonCount">0</span> | Level: <span id="playerLevel">1</span></p>
                     </div>
                 </div>
-                <div class="controls">
-                    <button id="upBtn" class="arrow">↑</button>
-                    <button id="leftBtn" class="arrow">←</button>
-                    <button id="downBtn" class="arrow">↓</button>
-                    <button id="rightBtn" class="arrow">→</button>
+                
+                <!-- Nintendo Game Boy Controls -->
+                <div class="controls-container">
+                    <!-- D-Pad (Left) -->
+                    <div class="dpad">
+                        <button class="dpad-up" id="dpadUp">▲</button>
+                        <button class="dpad-left" id="dpadLeft">◄</button>
+                        <button class="dpad-center"></button>
+                        <button class="dpad-right" id="dpadRight">►</button>
+                        <button class="dpad-down" id="dpadDown">▼</button>
+                    </div>
+
+                    <!-- Action Buttons (Right) -->
+                    <div class="action-buttons">
+                        <button class="btn-y" id="btnY">Y</button>
+                        <button class="btn-x" id="btnX">X</button>
+                        <button class="center-circle"></button>
+                        <button class="btn-b" id="btnB">B</button>
+                        <button class="btn-a" id="btnA">A</button>
+                    </div>
                 </div>
+
+                <!-- Bottom Control Buttons -->
+                <div class="bottom-controls">
+                    <button id="selectBtn">SELECT</button>
+                    <button id="startBtn">START</button>
+                </div>
+
                 <button id="logoutBtn" class="logout-btn">Log Out</button>
             </div>
         </div>
