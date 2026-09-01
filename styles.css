@@ -36,7 +36,7 @@ body {
     padding: 20px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
     width: 100%;
-    max-width: 400px;
+    max-width: 600px;
 }
 
 .screen-content {
@@ -100,13 +100,14 @@ body {
 
 #gameCanvas {
     border: 2px solid #2a2a2a;
-    background: #a4c639;
+    background: #E8E8D0;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
     margin: 10px 0;
     width: 100%;
     height: auto;
     display: block;
+    max-width: 100%;
 }
 
 .game-info {
@@ -306,14 +307,14 @@ body {
 }
 
 /* Mobile responsiveness */
-@media (max-width: 480px) {
+@media (max-width: 600px) {
     .gameboy {
         border: 8px solid #2a2a2a;
-        padding: 15px;
+        padding: 12px;
     }
     
     .screen-content {
-        padding: 12px;
+        padding: 10px;
     }
     
     .dpad, .action-buttons {
@@ -322,15 +323,48 @@ body {
     }
     
     .dpad button, .action-buttons button {
-        font-size: 18px;
+        font-size: 16px;
     }
     
     .controls-container {
-        gap: 15px;
+        gap: 12px;
+    }
+    
+    #gameCanvas {
+        width: 100%;
+        height: auto;
     }
 }
 
-/* Labels for buttons */
+/* Very small screens */
+@media (max-width: 400px) {
+    .gameboy {
+        border: 6px solid #2a2a2a;
+        padding: 10px;
+        max-width: 95vw;
+    }
+    
+    .dpad, .action-buttons {
+        grid-template-columns: repeat(3, 40px);
+        grid-template-rows: repeat(3, 40px);
+    }
+    
+    .dpad button, .action-buttons button {
+        font-size: 14px;
+    }
+    
+    .bottom-controls {
+        gap: 15px;
+    }
+    
+    .bottom-controls button {
+        padding: 8px 12px;
+        font-size: 10px;
+        min-width: 60px;
+    }
+}
+
+/* Button Labels */
 .button-label {
     display: block;
     font-size: 10px;
