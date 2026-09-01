@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokémon Game Boy</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Login/Sign Up Screen -->
+        <div id="authScreen" class="screen active">
+            <div class="gameboy">
+                <div class="screen-content">
+                    <h1>Pokémon</h1>
+                    <div id="error" style="color: red; font-size: 12px; margin-bottom: 10px;"></div>
+                    <form id="authForm">
+                        <input type="email" id="email" placeholder="Email" required>
+                        <input type="password" id="password" placeholder="Password (6+ chars)" required>
+                        <button type="button" id="signupBtn">Sign Up</button>
+                        <button type="button" id="loginBtn">Log In</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen" class="screen">
+            <div class="gameboy">
+                <div class="screen-content">
+                    <h2 id="playerName">Welcome!</h2>
+                    <canvas id="gameCanvas" width="160" height="144"></canvas>
+                    <div class="game-info">
+                        <p>Pokémon: <span id="pokemonCount">0</span></p>
+                        <p>Level: <span id="playerLevel">1</span></p>
+                    </div>
+                </div>
+                <div class="controls">
+                    <button id="upBtn" class="arrow">↑</button>
+                    <button id="leftBtn" class="arrow">←</button>
+                    <button id="downBtn" class="arrow">↓</button>
+                    <button id="rightBtn" class="arrow">→</button>
+                </div>
+                <button id="logoutBtn" class="logout-btn">Log Out</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase CDN v9+ modular -->
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAerasympN1V2VyK-Xt8JeFUQNOQaFRz_o",
+            authDomain: "pokemon-gold.firebaseapp.com",
+            projectId: "pokemon-gold",
+            storageBucket: "pokemon-gold.firebasestorage.app",
+            messagingSenderId: "724744131728",
+            appId: "1:724744131728:web:cb633dde53eee29f32b415",
+            measurementId: "G-GRWQVBD6CW"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Make auth and db globally accessible
+        window.auth = auth;
+        window.db = db;
+        window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+        window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+        window.signOut = signOut;
+        window.collection = collection;
+        window.addDoc = addDoc;
+        window.query = query;
+        window.where = where;
+        window.getDocs = getDocs;
+
+        console.log("Firebase initialized successfully!");
+    </script>
+
+    <!-- Game Script -->
+    <script src="game.js"></script>
+</body>
+</html>
