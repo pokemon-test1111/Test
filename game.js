@@ -1,4 +1,4 @@
-// Full Pokémon-Style Game with PokeSprite Graphics
+// Full Pokémon-Style Game with Nintendo Game Boy Controls
 
 const TYPES = {
     fire: { weak: ['water', 'rock', 'ground'], strong: ['grass', 'bug', 'ice', 'steel'], color: '#FF6B35' },
@@ -43,7 +43,9 @@ let gameState = {
     inBattle: false,
     currentBattle: null,
     dex: [],
-    gameMode: 'explore' // explore, battle, shop
+    gameMode: 'explore',
+    menuOpen: false,
+    selectedMenuItem: 0
 };
 
 let battleState = {
@@ -70,6 +72,18 @@ const logoutBtn = document.getElementById('logoutBtn');
 const playerNameDisplay = document.getElementById('playerName');
 const pokemonCountDisplay = document.getElementById('pokemonCount');
 const playerLevelDisplay = document.getElementById('playerLevel');
+
+// Game Boy Button Elements
+const dpadUp = document.getElementById('dpadUp');
+const dpadDown = document.getElementById('dpadDown');
+const dpadLeft = document.getElementById('dpadLeft');
+const dpadRight = document.getElementById('dpadRight');
+const btnA = document.getElementById('btnA');
+const btnB = document.getElementById('btnB');
+const btnX = document.getElementById('btnX');
+const btnY = document.getElementById('btnY');
+const selectBtn = document.getElementById('selectBtn');
+const startBtn = document.getElementById('startBtn');
 
 function showError(msg) { alert(msg); console.error(msg); }
 
@@ -214,9 +228,10 @@ function startPokemonSelection() {
 
 function startExploration() {
     gameState.gameMode = 'explore';
+    gameState.menuOpen = false;
     updateUI();
     drawExploration();
-    setupExplorationControls();
+    setupGameControls();
 }
 
 function updateUI() {
@@ -250,44 +265,108 @@ function drawExploration() {
     // Instructions
     ctx.fillStyle = '#000';
     ctx.font = '5px monospace';
-    ctx.fillText('A:Battle  S:Items  D:Team', 2, 135);
+    ctx.fillText('START: Menu  A: Battle', 2, 135);
 }
 
 function drawPlayerSprite(x, y) {
     // Simple trainer sprite
     ctx.fillStyle = '#FF0000';
-    ctx.fillRect(x + 3, y, 4, 5); // Head
+    ctx.fillRect(x + 3, y, 4, 5);
     
     ctx.fillStyle = '#0066CC';
-    ctx.fillRect(x + 2, y + 5, 6, 5); // Body
+    ctx.fillRect(x + 2, y + 5, 6, 5);
     
     ctx.fillStyle = '#FFCC99';
-    ctx.fillRect(x, y + 5, 2, 3); // Left arm
-    ctx.fillRect(x + 8, y + 5, 2, 3); // Right arm
+    ctx.fillRect(x, y + 5, 2, 3);
+    ctx.fillRect(x + 8, y + 5, 2, 3);
     
     ctx.fillStyle = '#000';
-    ctx.fillRect(x + 2, y + 10, 2, 4); // Left leg
-    ctx.fillRect(x + 4, y + 10, 2, 4); // Right leg
+    ctx.fillRect(x + 2, y + 10, 2, 4);
+    ctx.fillRect(x + 4, y + 10, 2, 4);
 }
 
-function setupExplorationControls() {
-    document.removeEventListener('keydown', handleExplorationKey);
-    document.addEventListener('keydown', handleExplorationKey);
-    document.getElementById('upBtn').onclick = () => startRandomBattle();
-    document.getElementById('downBtn').onclick = () => showItems();
-    document.getElementById('leftBtn').onclick = () => showTeam();
-    document.getElementById('rightBtn').onclick = () => {};
-}
-
-function handleExplorationKey(e) {
-    if (!gameScreen.classList.contains('active') || gameState.inBattle) return;
+function setupGameControls() {
+    // D-Pad
+    dpadUp.onclick = () => gameState.inBattle ? null : showError('D-Pad Up');
+    dpadDown.onclick = () => gameState.inBattle ? null : showError('D-Pad Down');
+    dpadLeft.onclick = () => gameState.inBattle ? null : showError('D-Pad Left');
+    dpadRight.onclick = () => gameState.inBattle ? null : showError('D-Pad Right');
     
-    if (e.key === 'a' || e.key === 'A') {
+    // Action Buttons
+    btnA.onclick = () => handleButtonA();
+    btnB.onclick = () => handleButtonB();
+    btnX.onclick = () => handleButtonX();
+    btnY.onclick = () => handleButtonY();
+    
+    // Control Buttons
+    selectBtn.onclick = () => showItems();
+    startBtn.onclick = () => openMainMenu();
+    
+    // Keyboard support
+    document.addEventListener('keydown', handleKeyPress);
+}
+
+function handleButtonA() {
+    if (gameState.gameMode === 'battle') {
+        playerAttack();
+    } else if (gameState.gameMode === 'explore') {
         startRandomBattle();
-    } else if (e.key === 's' || e.key === 'S') {
-        showItems();
-    } else if (e.key === 'd' || e.key === 'D') {
-        showTeam();
+    }
+}
+
+function handleButtonB() {
+    if (gameState.gameMode === 'battle') {
+        runAway();
+    } else {
+        gameState.menuOpen = false;
+    }
+}
+
+function handleButtonX() {
+    showTeam();
+}
+
+function handleButtonY() {
+    if (gameState.gameMode === 'battle') {
+        useItemInBattle();
+    }
+}
+
+function handleKeyPress(e) {
+    if (!gameScreen.classList.contains('active')) return;
+    
+    switch(e.key.toLowerCase()) {
+        case 'arrowup':
+            dpadUp.click();
+            break;
+        case 'arrowdown':
+            dpadDown.click();
+            break;
+        case 'arrowleft':
+            dpadLeft.click();
+            break;
+        case 'arrowright':
+            dpadRight.click();
+            break;
+        case 'z':
+        case 'a':
+            btnA.click();
+            break;
+        case 'x':
+            btnB.click();
+            break;
+        case 's':
+            btnX.click();
+            break;
+        case 'c':
+            btnY.click();
+            break;
+        case 'enter':
+            startBtn.click();
+            break;
+        case ' ':
+            selectBtn.click();
+            break;
     }
 }
 
@@ -307,11 +386,9 @@ function startRandomBattle() {
     battleState.playerTurn = true;
     
     drawBattle();
-    setupBattleControls();
 }
 
 function drawBattle() {
-    // Background
     ctx.fillStyle = '#A8E6A8';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
@@ -338,9 +415,6 @@ function drawBattle() {
     ctx.fillStyle = '#00AA00';
     const enemyHpPercent = Math.max(0, enemy.currentHp / enemy.maxHp);
     ctx.fillRect(95, 38, 40 * enemyHpPercent, 6);
-    ctx.fillStyle = '#000';
-    ctx.font = '4px monospace';
-    ctx.fillText('HP', 95, 47);
     
     // Player Pokémon area
     ctx.fillStyle = player.color;
@@ -375,16 +449,8 @@ function drawBattle() {
     
     ctx.fillStyle = '#000';
     ctx.font = '5px monospace';
-    ctx.fillText('▲Atk  ▼Item  ◄Ball  ►Run', 5, 125);
+    ctx.fillText('A:Atk  Y:Item  B:Run', 5, 125);
     ctx.fillText(battleState.battleLog.slice(-1)[0] || 'Go!', 5, 138);
-}
-
-function setupBattleControls() {
-    document.removeEventListener('keydown', handleExplorationKey);
-    document.getElementById('upBtn').onclick = () => playerAttack();
-    document.getElementById('downBtn').onclick = () => useItemInBattle();
-    document.getElementById('leftBtn').onclick = () => throwPokeball();
-    document.getElementById('rightBtn').onclick = () => runAway();
 }
 
 function playerAttack() {
@@ -495,6 +561,23 @@ function endBattle(won) {
     
     updateUI();
     startExploration();
+}
+
+function openMainMenu() {
+    gameState.menuOpen = !gameState.menuOpen;
+    if (gameState.menuOpen) {
+        const menu = `
+=== MAIN MENU ===
+
+[SELECT] - Items
+[X] - Team
+[START] - Menu
+
+A - Battle
+B - Back
+`;
+        showError(menu);
+    }
 }
 
 function showItems() {
