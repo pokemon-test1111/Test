@@ -1,4 +1,4 @@
-// Full Pokémon-Style Game with Nintendo Game Boy Controls
+// Full Pokémon-Style Game with Nintendo Game Boy Controls & Sprite Graphics
 
 const TYPES = {
     fire: { weak: ['water', 'rock', 'ground'], strong: ['grass', 'bug', 'ice', 'steel'], color: '#FF6B35' },
@@ -31,6 +31,33 @@ const pokemonBase = [
     { id: 95, name: 'Onix', type: 'rock', hp: 35, atk: 45, def: 160, spa: 30, spd: 45, spe: 70, catchRate: 45, color: '#B8A038' },
     { id: 102, name: 'Exeggcute', type: 'grass', hp: 60, atk: 40, def: 80, spa: 60, spd: 85, spe: 40, catchRate: 190, color: '#A8B820' }
 ];
+
+// Sprite image URLs from PokeSprite (free fan-made sprites)
+const spriteUrls = {
+    1: 'https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-icon/pokemon/001.png',
+    4: 'https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-icon/pokemon/004.png',
+    7: 'https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-icon/pokemon/007.png',
+    25: 'https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-icon/pokemon/025.png',
+    58: 'https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-icon/pokemon/058.png',
+    63: 'https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-icon/pokemon/063.png',
+    69: 'https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-icon/pokemon/069.png',
+    133: 'https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-icon/pokemon/133.png',
+    95: 'https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-icon/pokemon/095.png',
+    102: 'https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-icon/pokemon/102.png'
+};
+
+// Image cache
+const spriteCache = {};
+
+function loadSpriteImage(id) {
+    if (!spriteCache[id]) {
+        const img = new Image();
+        img.src = spriteUrls[id];
+        img.crossOrigin = 'anonymous';
+        spriteCache[id] = img;
+    }
+    return spriteCache[id];
+}
 
 let gameState = {
     playerId: null,
@@ -212,6 +239,11 @@ async function loadGame() {
     } catch (error) {
         console.error('Load error:', error);
     }
+    
+    // Preload sprites
+    pokemonBase.forEach(pok => {
+        loadSpriteImage(pok.id);
+    });
     
     if (gameState.team.length === 0) {
         startPokemonSelection();
@@ -395,50 +427,81 @@ function drawBattle() {
     const player = battleState.playerPokemon;
     const enemy = battleState.enemyPokemon;
     
-    // Enemy Pokémon area
-    ctx.fillStyle = enemy.color;
-    ctx.fillRect(90, 10, 60, 50);
+    // Enemy Pokémon area with sprite
+    ctx.fillStyle = '#D3D3D3';
+    ctx.fillRect(85, 5, 70, 60);
     ctx.strokeStyle = '#000';
     ctx.lineWidth = 2;
-    ctx.strokeRect(90, 10, 60, 50);
+    ctx.strokeRect(85, 5, 70, 60);
+    
+    // Draw enemy sprite
+    const enemySprite = spriteCache[enemy.id];
+    if (enemySprite && enemySprite.complete) {
+        try {
+            ctx.drawImage(enemySprite, 95, 15, 48, 48);
+        } catch (e) {
+            // Fallback to colored box if image fails
+            ctx.fillStyle = enemy.color;
+            ctx.fillRect(100, 20, 40, 40);
+        }
+    } else {
+        ctx.fillStyle = enemy.color;
+        ctx.fillRect(100, 20, 40, 40);
+    }
     
     // Enemy info
-    ctx.fillStyle = '#FFF';
-    ctx.font = 'bold 6px monospace';
-    ctx.fillText(enemy.name, 95, 25);
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 5px monospace';
+    ctx.fillText(enemy.name, 88, 62);
     ctx.font = '5px monospace';
-    ctx.fillText('Lv.' + enemy.level, 95, 32);
+    ctx.fillText('Lv.' + enemy.level, 130, 62);
     
-    // Enemy HP bar
-    ctx.fillStyle = '#FF0000';
-    ctx.fillRect(95, 38, 40, 6);
-    ctx.fillStyle = '#00AA00';
-    const enemyHpPercent = Math.max(0, enemy.currentHp / enemy.maxHp);
-    ctx.fillRect(95, 38, 40 * enemyHpPercent, 6);
-    
-    // Player Pokémon area
-    ctx.fillStyle = player.color;
-    ctx.fillRect(10, 60, 60, 50);
+    // Player Pokémon area with sprite
+    ctx.fillStyle = '#D3D3D3';
+    ctx.fillRect(5, 70, 70, 60);
     ctx.strokeStyle = '#000';
     ctx.lineWidth = 2;
-    ctx.strokeRect(10, 60, 60, 50);
+    ctx.strokeRect(5, 70, 70, 60);
+    
+    // Draw player sprite
+    const playerSprite = spriteCache[player.id];
+    if (playerSprite && playerSprite.complete) {
+        try {
+            ctx.drawImage(playerSprite, 15, 80, 48, 48);
+        } catch (e) {
+            // Fallback to colored box if image fails
+            ctx.fillStyle = player.color;
+            ctx.fillRect(20, 85, 40, 40);
+        }
+    } else {
+        ctx.fillStyle = player.color;
+        ctx.fillRect(20, 85, 40, 40);
+    }
     
     // Player info
-    ctx.fillStyle = '#FFF';
-    ctx.font = 'bold 6px monospace';
-    ctx.fillText(player.name, 15, 75);
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 5px monospace';
+    ctx.fillText(player.name, 8, 132);
     ctx.font = '5px monospace';
-    ctx.fillText('Lv.' + player.level, 15, 82);
+    ctx.fillText('Lv.' + player.level, 50, 132);
     
-    // Player HP bar
+    // HP bars
+    // Enemy HP
     ctx.fillStyle = '#FF0000';
-    ctx.fillRect(15, 88, 40, 6);
+    ctx.fillRect(88, 67, 35, 4);
+    ctx.fillStyle = '#00AA00';
+    const enemyHpPercent = Math.max(0, enemy.currentHp / enemy.maxHp);
+    ctx.fillRect(88, 67, 35 * enemyHpPercent, 4);
+    
+    // Player HP
+    ctx.fillStyle = '#FF0000';
+    ctx.fillRect(8, 135, 35, 4);
     ctx.fillStyle = '#00AA00';
     const playerHpPercent = Math.max(0, player.currentHp / player.maxHp);
-    ctx.fillRect(15, 88, 40 * playerHpPercent, 6);
+    ctx.fillRect(8, 135, 35 * playerHpPercent, 4);
     ctx.fillStyle = '#000';
     ctx.font = '4px monospace';
-    ctx.fillText(player.currentHp + '/' + player.maxHp, 15, 102);
+    ctx.fillText(player.currentHp + '/' + player.maxHp, 8, 143);
     
     // Battle options panel
     ctx.fillStyle = '#D3D3D3';
@@ -494,29 +557,6 @@ function enemyAttack() {
     }
     
     battleState.playerTurn = true;
-    drawBattle();
-}
-
-function throwPokeball() {
-    if (gameState.items.pokeball <= 0) { showError('No Pokéballs!'); return; }
-    
-    const enemy = battleState.enemyPokemon;
-    const catchChance = (enemy.catchRate / (2 * enemy.maxHp)) * (enemy.maxHp / Math.max(1, enemy.currentHp)) * 150;
-    const success = Math.random() * 255 < catchChance;
-    
-    gameState.items.pokeball--;
-    
-    if (success) {
-        gameState.team.push(enemy);
-        battleState.battleLog.push(`${enemy.name} caught!`);
-        showError(`Caught ${enemy.name}!`);
-        endBattle(true);
-    } else {
-        battleState.battleLog.push('Ball broke free!');
-        battleState.playerTurn = false;
-        setTimeout(() => enemyAttack(), 600);
-    }
-    
     drawBattle();
 }
 
