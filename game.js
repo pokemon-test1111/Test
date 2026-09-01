@@ -1,4 +1,4 @@
-// Full Pokémon-Style Game with Nintendo Game Boy Controls & Sprite Graphics
+// Full Pokémon-Style Game with Nintendo Game Boy Controls & Authentic Battle UI
 
 const TYPES = {
     fire: { weak: ['water', 'rock', 'ground'], strong: ['grass', 'bug', 'ice', 'steel'], color: '#FF6B35' },
@@ -32,7 +32,7 @@ const pokemonBase = [
     { id: 102, name: 'Exeggcute', type: 'grass', hp: 60, atk: 40, def: 80, spa: 60, spd: 85, spe: 40, catchRate: 190, color: '#A8B820' }
 ];
 
-// Sprite image URLs from PokeSprite (free fan-made sprites)
+// Sprite image URLs from PokeSprite
 const spriteUrls = {
     1: 'https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-icon/pokemon/001.png',
     4: 'https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-icon/pokemon/004.png',
@@ -46,7 +46,6 @@ const spriteUrls = {
     102: 'https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-icon/pokemon/102.png'
 };
 
-// Image cache
 const spriteCache = {};
 
 function loadSpriteImage(id) {
@@ -86,8 +85,8 @@ let battleState = {
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-canvas.width = 160;
-canvas.height = 144;
+canvas.width = 320;
+canvas.height = 288;
 
 const authScreen = document.getElementById('authScreen');
 const gameScreen = document.getElementById('gameScreen');
@@ -100,7 +99,6 @@ const playerNameDisplay = document.getElementById('playerName');
 const pokemonCountDisplay = document.getElementById('pokemonCount');
 const playerLevelDisplay = document.getElementById('playerLevel');
 
-// Game Boy Button Elements
 const dpadUp = document.getElementById('dpadUp');
 const dpadDown = document.getElementById('dpadDown');
 const dpadLeft = document.getElementById('dpadLeft');
@@ -240,7 +238,6 @@ async function loadGame() {
         console.error('Load error:', error);
     }
     
-    // Preload sprites
     pokemonBase.forEach(pok => {
         loadSpriteImage(pok.id);
     });
@@ -273,68 +270,58 @@ function updateUI() {
 }
 
 function drawExploration() {
-    // Grass background
     ctx.fillStyle = '#7CB342';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // Tall grass patches
     ctx.fillStyle = '#558B2F';
-    for (let i = 0; i < 5; i++) {
-        ctx.fillRect(30 + i * 25, 40 + (i % 2) * 20, 20, 30);
+    for (let i = 0; i < 8; i++) {
+        ctx.fillRect(40 + i * 35, 80 + (i % 2) * 30, 30, 50);
     }
     
-    // Draw player sprite
-    drawPlayerSprite(75, 70);
+    drawPlayerSprite(150, 140);
     
-    // Status bar
     ctx.fillStyle = '#B4B4B4';
-    ctx.fillRect(0, 0, canvas.width, 12);
+    ctx.fillRect(0, 0, canvas.width, 24);
     ctx.fillStyle = '#000';
-    ctx.font = 'bold 6px monospace';
-    ctx.fillText(gameState.playerName.substring(0, 8), 2, 9);
-    ctx.fillText('$' + gameState.money, canvas.width - 30, 9);
+    ctx.font = 'bold 12px monospace';
+    ctx.fillText(gameState.playerName.substring(0, 16), 4, 18);
+    ctx.fillText('$' + gameState.money, canvas.width - 80, 18);
     
-    // Instructions
     ctx.fillStyle = '#000';
-    ctx.font = '5px monospace';
-    ctx.fillText('START: Menu  A: Battle', 2, 135);
+    ctx.font = '10px monospace';
+    ctx.fillText('START: Menu  A: Battle', 4, 270);
 }
 
 function drawPlayerSprite(x, y) {
-    // Simple trainer sprite
     ctx.fillStyle = '#FF0000';
-    ctx.fillRect(x + 3, y, 4, 5);
+    ctx.fillRect(x + 6, y, 8, 10);
     
     ctx.fillStyle = '#0066CC';
-    ctx.fillRect(x + 2, y + 5, 6, 5);
+    ctx.fillRect(x + 4, y + 10, 12, 10);
     
     ctx.fillStyle = '#FFCC99';
-    ctx.fillRect(x, y + 5, 2, 3);
-    ctx.fillRect(x + 8, y + 5, 2, 3);
+    ctx.fillRect(x, y + 10, 4, 6);
+    ctx.fillRect(x + 16, y + 10, 4, 6);
     
     ctx.fillStyle = '#000';
-    ctx.fillRect(x + 2, y + 10, 2, 4);
-    ctx.fillRect(x + 4, y + 10, 2, 4);
+    ctx.fillRect(x + 4, y + 20, 4, 8);
+    ctx.fillRect(x + 8, y + 20, 4, 8);
 }
 
 function setupGameControls() {
-    // D-Pad
     dpadUp.onclick = () => gameState.inBattle ? null : showError('D-Pad Up');
     dpadDown.onclick = () => gameState.inBattle ? null : showError('D-Pad Down');
     dpadLeft.onclick = () => gameState.inBattle ? null : showError('D-Pad Left');
     dpadRight.onclick = () => gameState.inBattle ? null : showError('D-Pad Right');
     
-    // Action Buttons
     btnA.onclick = () => handleButtonA();
     btnB.onclick = () => handleButtonB();
     btnX.onclick = () => handleButtonX();
     btnY.onclick = () => handleButtonY();
     
-    // Control Buttons
     selectBtn.onclick = () => showItems();
     startBtn.onclick = () => openMainMenu();
     
-    // Keyboard support
     document.addEventListener('keydown', handleKeyPress);
 }
 
@@ -421,99 +408,149 @@ function startRandomBattle() {
 }
 
 function drawBattle() {
-    ctx.fillStyle = '#A8E6A8';
+    // Main battle background
+    ctx.fillStyle = '#E8E8D0';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     const player = battleState.playerPokemon;
     const enemy = battleState.enemyPokemon;
     
-    // Enemy Pokémon area with sprite
-    ctx.fillStyle = '#D3D3D3';
-    ctx.fillRect(85, 5, 70, 60);
+    // Upper arena area
+    ctx.fillStyle = '#A8D8A8';
+    ctx.fillRect(0, 0, canvas.width, 160);
+    
+    // Enemy Pokémon arena - Top Right
+    ctx.fillStyle = '#D4C9A8';
+    ctx.fillRect(180, 20, 120, 100);
     ctx.strokeStyle = '#000';
     ctx.lineWidth = 2;
-    ctx.strokeRect(85, 5, 70, 60);
+    ctx.strokeRect(180, 20, 120, 100);
     
     // Draw enemy sprite
     const enemySprite = spriteCache[enemy.id];
     if (enemySprite && enemySprite.complete) {
         try {
-            ctx.drawImage(enemySprite, 95, 15, 48, 48);
+            ctx.drawImage(enemySprite, 200, 35, 80, 80);
         } catch (e) {
-            // Fallback to colored box if image fails
             ctx.fillStyle = enemy.color;
-            ctx.fillRect(100, 20, 40, 40);
+            ctx.fillRect(220, 50, 60, 60);
         }
     } else {
         ctx.fillStyle = enemy.color;
-        ctx.fillRect(100, 20, 40, 40);
+        ctx.fillRect(220, 50, 60, 60);
     }
     
-    // Enemy info
-    ctx.fillStyle = '#000';
-    ctx.font = 'bold 5px monospace';
-    ctx.fillText(enemy.name, 88, 62);
-    ctx.font = '5px monospace';
-    ctx.fillText('Lv.' + enemy.level, 130, 62);
-    
-    // Player Pokémon area with sprite
-    ctx.fillStyle = '#D3D3D3';
-    ctx.fillRect(5, 70, 70, 60);
+    // Enemy info box - Top Left
+    ctx.fillStyle = '#F8F8D8';
+    ctx.fillRect(10, 20, 160, 60);
     ctx.strokeStyle = '#000';
     ctx.lineWidth = 2;
-    ctx.strokeRect(5, 70, 70, 60);
+    ctx.strokeRect(10, 20, 160, 60);
+    
+    // Enemy name
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 14px monospace';
+    ctx.fillText(enemy.name.toUpperCase(), 20, 42);
+    
+    // Enemy level
+    ctx.font = '12px monospace';
+    ctx.fillText('Lv' + enemy.level, 130, 42);
+    
+    // Enemy HP bar
+    ctx.fillStyle = '#FF0000';
+    ctx.fillRect(20, 50, 80, 8);
+    ctx.fillStyle = '#00AA00';
+    const enemyHpPercent = Math.max(0, enemy.currentHp / enemy.maxHp);
+    ctx.fillRect(20, 50, 80 * enemyHpPercent, 8);
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(20, 50, 80, 8);
+    
+    // Player Pokémon - Bottom Left
+    ctx.fillStyle = '#D4C9A8';
+    ctx.fillRect(20, 170, 120, 100);
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(20, 170, 120, 100);
     
     // Draw player sprite
     const playerSprite = spriteCache[player.id];
     if (playerSprite && playerSprite.complete) {
         try {
-            ctx.drawImage(playerSprite, 15, 80, 48, 48);
+            ctx.drawImage(playerSprite, 40, 185, 80, 80);
         } catch (e) {
-            // Fallback to colored box if image fails
             ctx.fillStyle = player.color;
-            ctx.fillRect(20, 85, 40, 40);
+            ctx.fillRect(60, 205, 60, 60);
         }
     } else {
         ctx.fillStyle = player.color;
-        ctx.fillRect(20, 85, 40, 40);
+        ctx.fillRect(60, 205, 60, 60);
     }
     
-    // Player info
+    // Player info box - Bottom Right
+    ctx.fillStyle = '#F8F8D8';
+    ctx.fillRect(150, 170, 160, 100);
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(150, 170, 160, 100);
+    
+    // Player name
     ctx.fillStyle = '#000';
-    ctx.font = 'bold 5px monospace';
-    ctx.fillText(player.name, 8, 132);
-    ctx.font = '5px monospace';
-    ctx.fillText('Lv.' + player.level, 50, 132);
+    ctx.font = 'bold 14px monospace';
+    ctx.fillText(player.name.toUpperCase(), 160, 192);
     
-    // HP bars
-    // Enemy HP
-    ctx.fillStyle = '#FF0000';
-    ctx.fillRect(88, 67, 35, 4);
-    ctx.fillStyle = '#00AA00';
-    const enemyHpPercent = Math.max(0, enemy.currentHp / enemy.maxHp);
-    ctx.fillRect(88, 67, 35 * enemyHpPercent, 4);
+    // Player level
+    ctx.font = '12px monospace';
+    ctx.fillText('Lv' + player.level, 270, 192);
     
-    // Player HP
+    // Player HP bar label
+    ctx.font = '12px monospace';
+    ctx.fillText('HP', 160, 210);
+    
+    // Player HP bar
     ctx.fillStyle = '#FF0000';
-    ctx.fillRect(8, 135, 35, 4);
+    ctx.fillRect(190, 200, 110, 10);
     ctx.fillStyle = '#00AA00';
     const playerHpPercent = Math.max(0, player.currentHp / player.maxHp);
-    ctx.fillRect(8, 135, 35 * playerHpPercent, 4);
-    ctx.fillStyle = '#000';
-    ctx.font = '4px monospace';
-    ctx.fillText(player.currentHp + '/' + player.maxHp, 8, 143);
-    
-    // Battle options panel
-    ctx.fillStyle = '#D3D3D3';
-    ctx.fillRect(0, 115, canvas.width, 29);
+    ctx.fillRect(190, 200, 110 * playerHpPercent, 10);
     ctx.strokeStyle = '#000';
     ctx.lineWidth = 1;
-    ctx.strokeRect(0, 115, canvas.width, 29);
+    ctx.strokeRect(190, 200, 110, 10);
     
+    // HP numbers
+    ctx.font = '10px monospace';
     ctx.fillStyle = '#000';
-    ctx.font = '5px monospace';
-    ctx.fillText('A:Atk  Y:Item  B:Run', 5, 125);
-    ctx.fillText(battleState.battleLog.slice(-1)[0] || 'Go!', 5, 138);
+    ctx.fillText(player.currentHp + '/' + player.maxHp, 160, 240);
+    
+    // EXP bar
+    ctx.fillStyle = '#6B8FBF';
+    ctx.fillRect(190, 245, 110, 8);
+    ctx.fillStyle = '#FFD60A';
+    ctx.fillRect(190, 245, 110 * 0.5, 8);
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(190, 245, 110, 8);
+    ctx.font = '9px monospace';
+    ctx.fillStyle = '#000';
+    ctx.fillText('EXP', 160, 254);
+    
+    // Battle log box
+    ctx.fillStyle = '#336699';
+    ctx.fillRect(0, 275, canvas.width, 60);
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(0, 275, canvas.width, 60);
+    
+    // Battle message
+    ctx.fillStyle = '#FFF';
+    ctx.font = '12px monospace';
+    const logMsg = battleState.battleLog.slice(-1)[0] || 'Go!';
+    ctx.fillText(logMsg, 10, 305);
+    
+    // Battle options
+    ctx.fillStyle = '#FFD60A';
+    ctx.font = 'bold 11px monospace';
+    ctx.fillText('A:ATTACK  Y:ITEM  B:RUN', 10, 325);
 }
 
 function playerAttack() {
@@ -524,7 +561,7 @@ function playerAttack() {
     const damage = calculateDamage(player, enemy);
     
     enemy.currentHp -= damage;
-    battleState.battleLog.push(`${player.name} Attacked! ${damage} dmg!`);
+    battleState.battleLog.push(`${player.name} used Tackle! ${damage} damage!`);
     
     if (enemy.currentHp <= 0) {
         endBattle(true);
@@ -549,7 +586,7 @@ function enemyAttack() {
     const damage = calculateDamage(enemy, player);
     
     player.currentHp -= damage;
-    battleState.battleLog.push(`${enemy.name} Attacked! ${damage} dmg!`);
+    battleState.battleLog.push(`${enemy.name} used Tackle! ${damage} damage!`);
     
     if (player.currentHp <= 0) {
         endBattle(false);
@@ -567,7 +604,7 @@ function useItemInBattle() {
     battleState.playerPokemon.currentHp = Math.min(battleState.playerPokemon.maxHp, battleState.playerPokemon.currentHp + heal);
     gameState.items.potion--;
     
-    battleState.battleLog.push('Used Potion!');
+    battleState.battleLog.push(battleState.playerPokemon.name + ' used Potion!');
     battleState.playerTurn = false;
     setTimeout(() => enemyAttack(), 600);
     
@@ -577,7 +614,8 @@ function useItemInBattle() {
 function runAway() {
     const escape = Math.random() > 0.3;
     if (escape) {
-        showError('Escaped!');
+        battleState.battleLog.push('Got away safely!');
+        showError('Escaped from battle!');
         endBattle(false);
     } else {
         battleState.battleLog.push('Escape failed!');
@@ -593,7 +631,7 @@ function endBattle(won) {
     if (won) {
         gameState.money += 50;
         gameState.level++;
-        showError('Won Battle! +$50');
+        showError('Won Battle! +$50 +1 Level!');
     } else {
         gameState.money = Math.max(0, gameState.money - 25);
         showError('Lost Battle! -$25');
